@@ -1,1 +1,1 @@
-Script de PY para extraccion de datos ODoo 
+Script de PY para extraccion y subida de datos 
