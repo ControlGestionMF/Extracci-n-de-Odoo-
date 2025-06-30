@@ -1,0 +1,87 @@
+"""
+Subida_pedidos.py
+Lee un CSV de pedidos y los inserta en la tabla `Pedidos` de Supabase.
+Las credenciales se obtienen de las variables de entorno:
+  - SUPABASE_URL
+  - SUPABASE_API_KEY
+"""
+
+import os
+import pandas as pd
+import numpy as np
+from supabase import create_client, Client
+
+# --------------------------------------------------------------------
+# 1) Credenciales (SE LEEN DESDE EL ENTORNO, NO SE ESCRIBEN EN CÓDIGO)
+# --------------------------------------------------------------------
+SUPABASE_URL = os.getenv("SUPABASE_URL")        # ej. https://wihcccvrwsiemsiddavs.supabase.co
+SUPABASE_KEY = os.getenv("SUPABASE_API_KEY")    # tu API key secreta
+
+# --------------------------------------------------------------------
+# 2) Configuración
+# --------------------------------------------------------------------
+NOMBRE_TABLA = "Pedidos"
+NOMBRE_CSV = "pedidos_venta_odoo.csv"
+
+# Columnas bigint de tu tabla
+COLUMNAS_BIGINT = [
+    "id_pedido",
+    "id_cliente",
+    "id_vendedor",
+    "id_lista_precios",
+    "id_plazo_pago",
+]
+
+# --------------------------------------------------------------------
+# 3) Funciones auxiliares
+# --------------------------------------------------------------------
+def safe_int(x):
+    """Convierte valores a int o devuelve None (evita excepciones)."""
+    if x is None or pd.isna(x) or str(x).strip() == "":
+        return None
+    try:
+        return int(float(str(x).strip()))
+    except Exception:
+        return None
+
+
+# --------------------------------------------------------------------
+# 4) Flujo principal
+# --------------------------------------------------------------------
+def main():
+    # 4.1) Leer CSV ---------------------------------------------------
+    try:
+        df = pd.read_csv(NOMBRE_CSV)
+        print("Columnas detectadas:", list(df.columns))
+
+        # Reemplazar NaN e infinitos por None
+        df = df.replace({np.nan: None, np.inf: None, -np.inf: None})
+
+        # Convertir columnas bigint a int seguro
+        for col in COLUMNAS_BIGINT:
+            if col in df.columns:
+                print(f"Convirtiendo '{col}' a int...")
+                df[col] = df[col].apply(safe_int)
+
+    except Exception as e:
+        print(f"[ERROR] Al leer el CSV: {e}")
+        return
+
+    # 4.2) Conectar con Supabase -------------------------------------
+    try:
+        supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    except Exception as e:
+        print(f"[ERROR] Conexión a Supabase: {e}")
+        return
+
+    # 4.3) Insertar filas una a una ----------------------------------
+    for fila in df.to_dict(orient="records"):
+        try:
+            resp = supabase.table(NOMBRE_TABLA).insert(fila).execute()
+            print("Insert OK:", resp)
+        except Exception as e:
+            print(f"[ERROR] Al insertar fila: {e}")
+
+
+if __name__ == "__main__":
+    main()
