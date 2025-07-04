@@ -5,7 +5,7 @@ from supabase import create_client, Client
 # Credenciales de Supabase
 SUPABASE_URL = "https://wihcccvrwsiemsiddavs.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpaGNjY3Zyd3NpZW1zaWRkYXZzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDcwMDQ5NiwiZXhwIjoyMDY2Mjc2NDk2fQ.krFz_vYCVdABBmDgXw_kXc886w-KbVOemisdoHGI2zw"
-NOMBRE_TABLA = "Pedidos"
+NOMBRE_TABLA = "pedidos"
 NOMBRE_CSV = "pedidos_venta_odoo.csv"
 
 # Corrige aquí los nombres de columnas tipo bigint (agrega todas las que sean bigint en tu tabla)
